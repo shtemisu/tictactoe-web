@@ -30,11 +30,10 @@ func NewUserService(userRepo db.UserRepository) *UserService {
 
 func (u *UserService) CreateUser(ctx context.Context, req model.SignUpRequest) error {
 	userExists, _ := u.userRepo.FindUserByLogin(ctx, req.Login)
-	log.Println("in user service req.Login: ", req.Login)
-	log.Println("in user service:", userExists)
 	if userExists != nil {
 		return errors.New("user with that login already exists")
 	}
+
 	hashPassword := sha256.Sum256([]byte(req.Password))
 	user := &model.User{
 		ID:       uuid.New(),
@@ -50,6 +49,19 @@ func (u *UserService) CreateUser(ctx context.Context, req model.SignUpRequest) e
 
 func (u *UserService) GetUserBylogin(ctx context.Context, login string) (*model.User, error) {
 	user, err := u.userRepo.FindUserByLogin(ctx, login)
+	if err != nil {
+		return nil, errors.New("user not found or not exists")
+	}
+
+	userDomain, err1 := dto.UserToDomain(user)
+	if err1 != nil {
+		return nil, errors.New("failed to mapping user model")
+	}
+	return userDomain, nil
+}
+
+func (u *UserService) GetUserByID(ctx context.Context, id string) (*model.User, error) {
+	user, err := u.userRepo.FindUserByID(ctx, id)
 	if err != nil {
 		return nil, errors.New("user not found or not exists")
 	}

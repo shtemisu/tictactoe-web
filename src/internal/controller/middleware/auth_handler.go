@@ -4,39 +4,56 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
+	"strings"
 	"tictactoe/internal/controller/dto/response"
 	"tictactoe/internal/domain/model"
 	"tictactoe/internal/usecase/auth"
+	"tictactoe/pkg/jwt"
 
 	"github.com/google/uuid"
 )
 
 type AuthHandler struct {
 	authService *auth.AuthService
+	jwtProvider *jwt.JwtProvider
 }
 
-func NewAuthHandler(a *auth.AuthService) *AuthHandler {
+func NewAuthHandler(a *auth.AuthService, jp *jwt.JwtProvider) *AuthHandler {
 	return &AuthHandler{
 		authService: a,
+		jwtProvider: jp,
 	}
 }
 
 func (au *AuthHandler) Authenticate(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		username, password, ok := r.BasicAuth()
-		if !ok {
-			http.Error(w, "Invalid login or password", http.StatusUnauthorized)
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+			au.writeError(w, http.StatusUnauthorized, "Unauthorized")
 			return
 		}
-		userID, err := au.authService.SignIn(r.Context(), username, password)
+		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+
+		if !au.jwtProvider.ValidateAccessToken(tokenStr) {
+			au.writeError(w, http.StatusUnauthorized, "Invalid token")
+			return
+		}
+
+		userID, err := au.jwtProvider.GetUUIDByToken(tokenStr, false)
 		if err != nil {
-			http.Error(w, "Unauthorization", http.StatusUnauthorized)
+			au.writeError(w, http.StatusUnauthorized, "Invalid token")
 			return
 		}
-		ctx := context.WithValue(r.Context(), "userID", userID)
-		next.ServeHTTP(w, r.WithContext(ctx))
+
+		userUUID, err := uuid.Parse(userID)
+		if err != nil {
+			au.writeError(w, http.StatusUnauthorized, "Invalid user ID")
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), "userID", userUUID)
+		next(w, r.WithContext(ctx))
 	}
 }
 
@@ -63,22 +80,44 @@ func (au *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func (au *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
-	username, password, ok := r.BasicAuth()
-	if !ok {
-		au.writeError(w, http.StatusUnauthorized, "invalid credentials")
+	req := jwt.JwtRequest{}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		au.writeError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
-	userID, err := au.authService.SignIn(r.Context(), username, password)
+	jwtResponse, err := au.authService.SignIn(r.Context(), req)
 	if err != nil {
-		log.Println(err)
 		au.writeError(w, http.StatusUnauthorized, err.Error())
 		return
 	}
-	au.writeJSON(w, http.StatusOK, map[string]string{
-		"user_id": userID.String(),
-		"code":    fmt.Sprint(http.StatusOK),
-		"message": "Login successfully",
-	})
+	au.writeJSON(w, http.StatusOK, jwtResponse)
+}
+func (au *AuthHandler) UpdateAccessToken(w http.ResponseWriter, r *http.Request) {
+	req := jwt.RefreshJwtRequest{}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		au.writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	jwtResponse, err := au.authService.UpdateAccessToken(r.Context(), req.RefreshToken)
+	if err != nil {
+		au.writeError(w, http.StatusUnauthorized, err.Error())
+	}
+	au.writeJSON(w, http.StatusOK, jwtResponse)
+}
+
+func (au *AuthHandler) UpdateRefreshToken(w http.ResponseWriter, r *http.Request) {
+	req := jwt.RefreshJwtRequest{}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		au.writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	jwtResponse, err := au.authService.UpdateRefreshToken(r.Context(), req.RefreshToken)
+	if err != nil {
+		au.writeError(w, http.StatusUnauthorized, err.Error())
+	}
+	au.writeJSON(w, http.StatusOK, jwtResponse)
 }
 
 func (au *AuthHandler) writeJSON(w http.ResponseWriter, status int, data any) {
