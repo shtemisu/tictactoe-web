@@ -16,6 +16,7 @@ import (
 	"tictactoe/internal/usecase/auth"
 	usecases "tictactoe/internal/usecase/service"
 	"tictactoe/internal/usecase/user"
+	"tictactoe/pkg/jwt"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -27,7 +28,6 @@ func Module() fx.Option {
 		fx.Provide(
 			config.NewConfig,
 			NewPostgresPool,
-
 			db.NewGameRepository,
 			fx.Annotate(
 				db.NewGameRepository,
@@ -53,6 +53,9 @@ func Module() fx.Option {
 				user.NewUserService,
 				fx.As(new(domainService.UserService)),
 			),
+			fx.Annotate(func(cfg *config.Config) *jwt.JwtProvider {
+				return jwt.NewJwtProvider(cfg.JWT_Access_Secret, cfg.JWT_Refresh_Secret)
+			}),
 			auth.NewAuthService,
 			middleware.NewAuthHandler,
 			handler.NewUserHandler,

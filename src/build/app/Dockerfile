@@ -8,6 +8,7 @@ RUN go mod download
 COPY ../../cmd/ ./cmd
 COPY ../../internal/ ./internal
 COPY ../../config/ ./config
+COPY ../../../pkg/jwt ./pkg/jwt
 COPY ../../.env/ ./.env
 
 RUN go build -o main ./cmd/app

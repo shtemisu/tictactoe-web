@@ -30,7 +30,6 @@ services:
     depends_on:
       postgres-tictactoe:
         condition: service_healthy
-    restart: on-failure
     networks:
       - tictactoe-network
 
