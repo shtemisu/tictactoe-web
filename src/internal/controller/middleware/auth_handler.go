@@ -30,7 +30,7 @@ func (au *AuthHandler) Authenticate(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-			au.writeError(w, http.StatusUnauthorized, "Unauthorized")
+			au.writeError(w, http.StatusBadRequest, "Bad request")
 			return
 		}
 		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
@@ -116,6 +116,7 @@ func (au *AuthHandler) UpdateRefreshToken(w http.ResponseWriter, r *http.Request
 	jwtResponse, err := au.authService.UpdateRefreshToken(r.Context(), req.RefreshToken)
 	if err != nil {
 		au.writeError(w, http.StatusUnauthorized, err.Error())
+		return
 	}
 	au.writeJSON(w, http.StatusOK, jwtResponse)
 }

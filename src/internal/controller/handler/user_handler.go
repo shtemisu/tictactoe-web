@@ -3,18 +3,42 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 	"tictactoe/internal/controller/dto/response"
 	"tictactoe/internal/usecase/user"
+	"tictactoe/pkg/jwt"
 )
 
 type UserHandler struct {
 	UserService *user.UserService
+	JwtProvider *jwt.JwtProvider
 }
 
-func NewUserHandler(us *user.UserService) *UserHandler {
+func NewUserHandler(us *user.UserService, jp *jwt.JwtProvider) *UserHandler {
 	return &UserHandler{
 		UserService: us,
+		JwtProvider: jp,
 	}
+}
+
+func (uh *UserHandler) GetUserInfoByAccessToken(w http.ResponseWriter, r *http.Request) {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+		uh.writeError(w, http.StatusBadRequest, "Bad request")
+		return
+	}
+	tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+	userID, err := uh.JwtProvider.GetUUIDByToken(tokenStr, false)
+	if err != nil {
+		uh.writeError(w, http.StatusNotFound, err.Error())
+		return
+	}
+	userResp, err := uh.UserService.GetUserInfo(r.Context(), userID)
+	if err != nil {
+		uh.writeError(w, http.StatusNotFound, err.Error())
+		return
+	}
+	uh.writeJSON(w, http.StatusOK, userResp)
 }
 
 func (uh *UserHandler) GetUserById(w http.ResponseWriter, r *http.Request) {
