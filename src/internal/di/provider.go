@@ -10,7 +10,7 @@ import (
 	web "tictactoe/internal/controller"
 	"tictactoe/internal/controller/handler"
 	"tictactoe/internal/controller/middleware"
-	domainRepo "tictactoe/internal/domain/repository/db"
+	domainRepo "tictactoe/internal/domain/repository"
 	domainService "tictactoe/internal/domain/service"
 	db "tictactoe/internal/repository/db"
 	"tictactoe/internal/usecase/auth"

@@ -18,8 +18,10 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+
   tictactoe:
     build:
+      context: .
       dockerfile: build/app/Dockerfile
     image: tictactoe-web:0.1
     container_name: tictactoe_cont

@@ -9,7 +9,7 @@ import (
 	"log"
 	"tictactoe/internal/controller/dto/response"
 	"tictactoe/internal/domain/model"
-	"tictactoe/internal/domain/repository/db"
+	db "tictactoe/internal/domain/repository"
 	domainService "tictactoe/internal/domain/service"
 	"tictactoe/internal/repository/db/dto"
 

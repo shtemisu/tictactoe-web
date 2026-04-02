@@ -5,7 +5,7 @@ import (
 	"errors"
 	"log"
 	"tictactoe/internal/domain/model"
-	"tictactoe/internal/domain/repository/db"
+	db "tictactoe/internal/domain/repository"
 	"tictactoe/internal/domain/service"
 	datasource "tictactoe/internal/repository/db/dto"
 )
