@@ -7,16 +7,15 @@ import (
 	"tictactoe/internal/controller/dto/request"
 	"tictactoe/internal/controller/dto/response"
 	"tictactoe/internal/controller/middleware"
-	"tictactoe/internal/domain/model"
-	domainService "tictactoe/internal/domain/service"
+	"tictactoe/internal/domain"
 	"time"
 )
 
 type GameHandler struct {
-	gameService domainService.GameService
+	gameService domain.GameService
 }
 
-func NewGameHandler(gameService domainService.GameService) *GameHandler {
+func NewGameHandler(gameService domain.GameService) *GameHandler {
 	return &GameHandler{
 		gameService: gameService,
 	}
@@ -155,7 +154,7 @@ func (h *GameHandler) PlayTurn(w http.ResponseWriter, r *http.Request) {
 
 	game, _ := h.gameService.GetGame(r.Context(), gameID)
 
-	if game.SecondPlayer.ID == "minmax" && game.Status == model.StatusPlaying {
+	if game.SecondPlayer.ID == "minmax" && game.Status == domain.StatusPlaying {
 		x, y, err := h.gameService.GetNextMove(r.Context(), gameID)
 		if err != nil {
 			h.writeError(w, http.StatusInternalServerError, err.Error())

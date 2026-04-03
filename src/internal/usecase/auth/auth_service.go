@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
-	"tictactoe/internal/domain/model"
+	"tictactoe/internal/domain"
 	"tictactoe/internal/usecase/user"
 	"tictactoe/pkg/jwt"
 )
@@ -25,7 +25,7 @@ func NewAuthService(userService *user.UserService, jwtProvider *jwt.JwtProvider)
 	}
 }
 
-func (a *AuthService) SignUp(ctx context.Context, req model.SignUpRequest) error {
+func (a *AuthService) SignUp(ctx context.Context, req domain.SignUpRequest) error {
 	if err := validateCredentialsFormat(req.Login, req.Password); err != nil {
 		return err
 	}

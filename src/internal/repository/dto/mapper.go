@@ -3,29 +3,29 @@ package dto
 import (
 	"errors"
 	"log"
-	domainModel "tictactoe/internal/domain/model"
+	"tictactoe/internal/domain"
 	rp "tictactoe/internal/repository/model"
 	"time"
 
 	"github.com/google/uuid"
 )
 
-func GameToDomain(rg *rp.GameModel) (*domainModel.Game, error) {
+func GameToDomain(rg *rp.GameModel) (*domain.Game, error) {
 	if rg == nil {
 		return nil, errors.New("failed to mapping into repo model")
 	}
 	cells := rg.Board.ToTwoDimensionArray()
-	domainBoard := domainModel.Board{
+	domainBoard := domain.Board{
 		Cells: cells,
 	}
-	turn := domainModel.Player{}
-	winner := domainModel.Player{}
-	firstPlayer := domainModel.Player{
+	turn := domain.Player{}
+	winner := domain.Player{}
+	firstPlayer := domain.Player{
 		ID:   rg.FirstPlayerID,
 		Icon: 1,
 	}
 
-	secondPlayer := domainModel.Player{
+	secondPlayer := domain.Player{
 		ID:   rg.SecondPlayerID,
 		Icon: 2,
 	}
@@ -56,7 +56,7 @@ func GameToDomain(rg *rp.GameModel) (*domainModel.Game, error) {
 		winner.ID = ""
 	}
 
-	return &domainModel.Game{
+	return &domain.Game{
 		ID:           rg.ID,
 		Board:        domainBoard,
 		FirstPlayer:  firstPlayer,
@@ -67,7 +67,7 @@ func GameToDomain(rg *rp.GameModel) (*domainModel.Game, error) {
 	}, nil
 }
 
-func GameFromDomain(dm *domainModel.Game) (*rp.GameModel, error) {
+func GameFromDomain(dm *domain.Game) (*rp.GameModel, error) {
 	if dm == nil {
 		return nil, errors.New("failed to mapping into repo model")
 	}
@@ -87,9 +87,9 @@ func GameFromDomain(dm *domainModel.Game) (*rp.GameModel, error) {
 	}
 
 	winnerID := ""
-	if dm.Status == domainModel.StatusGameOver && dm.Winner.ID != "" {
+	if dm.Status == domain.StatusGameOver && dm.Winner.ID != "" {
 		winnerID = dm.Winner.ID
-	} else if dm.Status == domainModel.StatusDraw {
+	} else if dm.Status == domain.StatusDraw {
 		winnerID = "draw"
 	}
 
@@ -106,19 +106,19 @@ func GameFromDomain(dm *domainModel.Game) (*rp.GameModel, error) {
 	}, nil
 }
 
-func UserToDomain(rg *rp.UserModel) (*domainModel.User, error) {
+func UserToDomain(rg *rp.UserModel) (*domain.User, error) {
 	uu_id, err := uuid.Parse(rg.UUID)
 	if err != nil {
 		log.Println("failed to mapping user model")
 	}
-	return &domainModel.User{
+	return &domain.User{
 		ID:       uu_id,
 		Login:    rg.Login,
 		Password: rg.Password,
 	}, nil
 }
 
-func UserFromDomain(dm *domainModel.User) (*rp.UserModel, error) {
+func UserFromDomain(dm *domain.User) (*rp.UserModel, error) {
 	uu_id := dm.ID.String()
 	return &rp.UserModel{
 		UUID:      uu_id,

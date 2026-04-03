@@ -7,10 +7,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"log"
-	"tictactoe/internal/controller/dto/response"
-	"tictactoe/internal/domain/model"
+	"tictactoe/internal/domain"
 	db "tictactoe/internal/domain/repository"
-	domainService "tictactoe/internal/domain/service"
 	"tictactoe/internal/repository/dto"
 
 	"github.com/google/uuid"
@@ -20,7 +18,7 @@ type UserService struct {
 	userRepo db.UserRepository
 }
 
-var _ domainService.UserService = (*UserService)(nil)
+var _ domain.UserService = (*UserService)(nil)
 
 func NewUserService(userRepo db.UserRepository) *UserService {
 	return &UserService{
@@ -28,14 +26,14 @@ func NewUserService(userRepo db.UserRepository) *UserService {
 	}
 }
 
-func (u *UserService) CreateUser(ctx context.Context, req model.SignUpRequest) error {
+func (u *UserService) CreateUser(ctx context.Context, req domain.SignUpRequest) error {
 	userExists, _ := u.userRepo.FindUserByLogin(ctx, req.Login)
 	if userExists != nil {
 		return errors.New("user with that login already exists")
 	}
 
 	hashPassword := sha256.Sum256([]byte(req.Password))
-	user := &model.User{
+	user := &domain.User{
 		ID:       uuid.New(),
 		Login:    req.Login,
 		Password: hex.EncodeToString(hashPassword[:]),
@@ -47,7 +45,7 @@ func (u *UserService) CreateUser(ctx context.Context, req model.SignUpRequest) e
 	return u.userRepo.SaveUser(ctx, *userRepoModel)
 }
 
-func (u *UserService) GetUserBylogin(ctx context.Context, login string) (*model.User, error) {
+func (u *UserService) GetUserBylogin(ctx context.Context, login string) (*domain.User, error) {
 	user, err := u.userRepo.FindUserByLogin(ctx, login)
 	if err != nil {
 		return nil, errors.New("user not found or not exists")
@@ -60,7 +58,7 @@ func (u *UserService) GetUserBylogin(ctx context.Context, login string) (*model.
 	return userDomain, nil
 }
 
-func (u *UserService) GetUserByID(ctx context.Context, id string) (*model.User, error) {
+func (u *UserService) GetUserByID(ctx context.Context, id string) (*domain.User, error) {
 	user, err := u.userRepo.FindUserByID(ctx, id)
 	if err != nil {
 		return nil, errors.New("user not found or not exists")
@@ -72,7 +70,7 @@ func (u *UserService) GetUserByID(ctx context.Context, id string) (*model.User, 
 	return userDomain, nil
 }
 
-func (s *UserService) GetUserInfo(ctx context.Context, ID string) (*response.UserResponse, error) {
+func (s *UserService) GetUserInfo(ctx context.Context, ID string) (*domain.UserResponse, error) {
 	user, err := s.userRepo.FindUserByID(ctx, ID)
 	if err != nil {
 		return nil, errors.New("user not found")
@@ -83,7 +81,7 @@ func (s *UserService) GetUserInfo(ctx context.Context, ID string) (*response.Use
 		return nil, errors.New("failed to get user stats")
 	}
 
-	return &response.UserResponse{
+	return &domain.UserResponse{
 		ID:          user.UUID,
 		Login:       user.Login,
 		GamesPlayed: gamesPlayed,

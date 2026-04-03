@@ -1,7 +1,7 @@
 package jwt
 
 import (
-	user "tictactoe/internal/domain/model"
+	"tictactoe/internal/domain"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -34,7 +34,7 @@ func NewJwtProvider(accessSecret, refreshSecret string) *JwtProvider {
 	}
 }
 
-func (jp *JwtProvider) GenerateAccessToken(user user.User) (string, error) {
+func (jp *JwtProvider) GenerateAccessToken(user domain.User) (string, error) {
 	claims := jwt.MapClaims{
 		"uuid": user.ID,
 		"exp":  time.Now().Add(time.Minute * 15).Unix(),
@@ -42,7 +42,7 @@ func (jp *JwtProvider) GenerateAccessToken(user user.User) (string, error) {
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(jp.accessSecret)
 }
 
-func (jp *JwtProvider) GenerateRefreshToken(user user.User) (string, error) {
+func (jp *JwtProvider) GenerateRefreshToken(user domain.User) (string, error) {
 	claims := jwt.MapClaims{
 		"uuid": user.ID,
 		"exp":  time.Now().Add(time.Hour * 24 * 30).Unix(),

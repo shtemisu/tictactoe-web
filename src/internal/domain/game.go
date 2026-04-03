@@ -1,6 +1,7 @@
-package model
+package domain
 
 import (
+	"context"
 	"errors"
 
 	"github.com/google/uuid"
@@ -26,6 +27,17 @@ type Game struct {
 	CurrentTurn  Player
 	Status       string
 	Winner       Player
+}
+
+type GameService interface {
+	CreateGameWithAI(ctx context.Context, playerID string) (string, error)
+	CreateMultiplayerGame(ctx context.Context, firstPlayerID string) (string, error)
+	JoinToGame(ctx context.Context, secondPlayerID string, gameID string) (*Game, error)
+	GetGame(ctx context.Context, gameID string) (*Game, error)
+	GetAllWaitingGames(ctx context.Context) ([]*Game, error)
+	GetTurn(ctx context.Context, gameID string) (uint8, error)
+	DoMove(ctx context.Context, gameID string, row uint8, col uint8) (bool, error)
+	GetNextMove(ctx context.Context, gameID string) (uint8, uint8, error)
 }
 
 func InitGameWithAI(firstPlayer Player) *Game {

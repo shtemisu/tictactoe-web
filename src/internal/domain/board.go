@@ -1,4 +1,4 @@
-package model
+package domain
 
 type Board struct {
 	Cells [3][3]uint8

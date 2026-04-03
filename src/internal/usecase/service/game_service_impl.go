@@ -4,19 +4,19 @@ import (
 	"context"
 	"errors"
 	"log"
-	"tictactoe/internal/domain/model"
+	"tictactoe/internal/domain"
 	db "tictactoe/internal/domain/repository"
-	"tictactoe/internal/domain/service"
+
 	datasource "tictactoe/internal/repository/dto"
 )
 
 type GameServiceImpl struct {
 	repo   db.GameRepository
-	minmax service.MinMaxService
+	minmax domain.MinMaxService
 }
 
 // метод-конструктор.
-func NewGameService(repo db.GameRepository, minmax service.MinMaxService) *GameServiceImpl {
+func NewGameService(repo db.GameRepository, minmax domain.MinMaxService) *GameServiceImpl {
 	return &GameServiceImpl{
 		repo:   repo,
 		minmax: minmax,
@@ -25,11 +25,11 @@ func NewGameService(repo db.GameRepository, minmax service.MinMaxService) *GameS
 
 // возвращает gameID - сгенерированный uuid, записывает в db
 func (gs *GameServiceImpl) CreateGameWithAI(ctx context.Context, playerID string) (string, error) {
-	player := model.Player{
+	player := domain.Player{
 		ID:   playerID,
 		Icon: 1,
 	}
-	game := model.InitGameWithAI(player)
+	game := domain.InitGameWithAI(player)
 	repoModel, err := datasource.GameFromDomain(game)
 	if err != nil {
 		return "", err
@@ -39,11 +39,11 @@ func (gs *GameServiceImpl) CreateGameWithAI(ctx context.Context, playerID string
 }
 
 func (gs *GameServiceImpl) CreateMultiplayerGame(ctx context.Context, firstPlayerID string) (string, error) {
-	player := model.Player{
+	player := domain.Player{
 		ID:   firstPlayerID,
 		Icon: 1,
 	}
-	game := model.InitMultiplayerGame(player)
+	game := domain.InitMultiplayerGame(player)
 	repoModel, err := datasource.GameFromDomain(game)
 	if err != nil {
 		return "", err
@@ -52,7 +52,7 @@ func (gs *GameServiceImpl) CreateMultiplayerGame(ctx context.Context, firstPlaye
 	return game.ID, nil
 }
 
-func (gs *GameServiceImpl) JoinToGame(ctx context.Context, secondPlayerID string, gameID string) (*model.Game, error) {
+func (gs *GameServiceImpl) JoinToGame(ctx context.Context, secondPlayerID string, gameID string) (*domain.Game, error) {
 	game, err := gs.repo.FindGameByWaitingStatus(ctx, gameID)
 	if err != nil {
 		return nil, err
@@ -81,7 +81,7 @@ func (gs *GameServiceImpl) GetTurn(ctx context.Context, gameID string) (uint8, e
 	return domainModel.CurrentTurn.Icon, nil
 }
 
-func (gs *GameServiceImpl) GetGame(ctx context.Context, gameID string) (*model.Game, error) {
+func (gs *GameServiceImpl) GetGame(ctx context.Context, gameID string) (*domain.Game, error) {
 	value, err1 := gs.repo.FindGameById(ctx, gameID)
 
 	if err1 != nil {
@@ -93,13 +93,13 @@ func (gs *GameServiceImpl) GetGame(ctx context.Context, gameID string) (*model.G
 	}
 	return domainModel, nil
 }
-func (gs *GameServiceImpl) GetAllWaitingGames(ctx context.Context) ([]*model.Game, error) {
+func (gs *GameServiceImpl) GetAllWaitingGames(ctx context.Context) ([]*domain.Game, error) {
 	games, err := gs.repo.FindAllWaitingGames(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	var domainGames []*model.Game
+	var domainGames []*domain.Game
 	for _, game := range games {
 		domainGame, err := datasource.GameToDomain(game)
 		if err != nil {
@@ -111,18 +111,18 @@ func (gs *GameServiceImpl) GetAllWaitingGames(ctx context.Context) ([]*model.Gam
 	return domainGames, nil
 }
 
-func (gs *GameServiceImpl) updateGameStatus(ctx context.Context, game *model.Game) error {
-	if game.SecondPlayer.ID != "" && game.FirstPlayer.ID != "" && game.Status == model.StatusWaiting {
-		game.Status = model.StatusPlaying
+func (gs *GameServiceImpl) updateGameStatus(ctx context.Context, game *domain.Game) error {
+	if game.SecondPlayer.ID != "" && game.FirstPlayer.ID != "" && game.Status == domain.StatusWaiting {
+		game.Status = domain.StatusPlaying
 		log.Println("Game status updated to playing, current turn remains with:", game.CurrentTurn.ID)
 	}
 
 	if game.CheckWinPlayer(game.CurrentTurn.Icon) {
 		game.Winner = game.CurrentTurn
-		game.Status = model.StatusGameOver
+		game.Status = domain.StatusGameOver
 	} else if game.IsDraw() {
-		game.Winner = model.Player{ID: "", Icon: 0}
-		game.Status = model.StatusDraw
+		game.Winner = domain.Player{ID: "", Icon: 0}
+		game.Status = domain.StatusDraw
 	}
 
 	repoModel, err := datasource.GameFromDomain(game)
@@ -133,8 +133,8 @@ func (gs *GameServiceImpl) updateGameStatus(ctx context.Context, game *model.Gam
 }
 
 // switchTurn меняет очередность хода
-func (gs *GameServiceImpl) switchTurn(ctx context.Context, game *model.Game) error {
-	if game.Status != model.StatusPlaying {
+func (gs *GameServiceImpl) switchTurn(ctx context.Context, game *domain.Game) error {
+	if game.Status != domain.StatusPlaying {
 		return nil
 	}
 
@@ -152,21 +152,21 @@ func (gs *GameServiceImpl) switchTurn(ctx context.Context, game *model.Game) err
 }
 
 // checkAndUpdateGameStatus проверяет завершение игры и обновляет статус
-func (gs *GameServiceImpl) checkAndUpdateGameStatus(ctx context.Context, game *model.Game) error {
+func (gs *GameServiceImpl) checkAndUpdateGameStatus(ctx context.Context, game *domain.Game) error {
 	gameOver := false
 
 	if game.CheckWinPlayer(game.CurrentTurn.Icon) {
 		game.Winner = game.CurrentTurn
-		game.Status = model.StatusGameOver
+		game.Status = domain.StatusGameOver
 		gameOver = true
 	} else if game.IsDraw() {
-		game.Winner = model.Player{ID: "", Icon: 0}
-		game.Status = model.StatusDraw
+		game.Winner = domain.Player{ID: "", Icon: 0}
+		game.Status = domain.StatusDraw
 		gameOver = true
 	}
 
-	if game.SecondPlayer.ID != "" && game.FirstPlayer.ID != "" && game.Status == model.StatusWaiting {
-		game.Status = model.StatusPlaying
+	if game.SecondPlayer.ID != "" && game.FirstPlayer.ID != "" && game.Status == domain.StatusWaiting {
+		game.Status = domain.StatusPlaying
 	}
 
 	repoModel, err := datasource.GameFromDomain(game)
@@ -194,7 +194,7 @@ func (gs *GameServiceImpl) DoMove(ctx context.Context, gameID string, row uint8,
 		return false, err2
 	}
 
-	if domainModel.Status != model.StatusPlaying {
+	if domainModel.Status != domain.StatusPlaying {
 		return false, errors.New("game is not active")
 	}
 
@@ -207,7 +207,7 @@ func (gs *GameServiceImpl) DoMove(ctx context.Context, gameID string, row uint8,
 		return false, err
 	}
 
-	if domainModel.Status == model.StatusPlaying {
+	if domainModel.Status == domain.StatusPlaying {
 		if err := gs.switchTurn(ctx, domainModel); err != nil {
 			return false, err
 		}

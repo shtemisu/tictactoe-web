@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 	"tictactoe/internal/controller/dto/response"
-	"tictactoe/internal/domain/model"
+	"tictactoe/internal/domain"
 	"tictactoe/internal/usecase/auth"
 	"tictactoe/pkg/jwt"
 
@@ -63,7 +63,7 @@ func GetUserById(ctx context.Context) (uuid.UUID, bool) {
 }
 
 func (au *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
-	req := model.SignUpRequest{}
+	req := domain.SignUpRequest{}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		au.writeError(w, http.StatusBadRequest, "Invalid request body")
 		return

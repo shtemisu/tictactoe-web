@@ -2,10 +2,10 @@ package mapper
 
 import (
 	"tictactoe/internal/controller/dto/response"
-	domainModel "tictactoe/internal/domain/model"
+	"tictactoe/internal/domain"
 )
 
-func DomainToResponse(game *domainModel.Game) *response.GameResponse {
+func DomainToResponse(game *domain.Game) *response.GameResponse {
 	if game == nil {
 		return nil
 	}
@@ -14,9 +14,9 @@ func DomainToResponse(game *domainModel.Game) *response.GameResponse {
 	var currentPlayer string
 
 	switch {
-	case game.Status == domainModel.StatusDraw:
+	case game.Status == domain.StatusDraw:
 		winPlayer = "draw"
-	case game.Status == domainModel.StatusGameOver && game.Winner.ID != "":
+	case game.Status == domain.StatusGameOver && game.Winner.ID != "":
 		winPlayer = game.Winner.ID
 	default:
 		winPlayer = "nothing"
@@ -33,7 +33,7 @@ func DomainToResponse(game *domainModel.Game) *response.GameResponse {
 
 	return &response.GameResponse{
 		GameID:         game.ID,
-		Board:          game.Board,
+		Board:          game.Board.Cells,
 		FirstPlayerID:  game.FirstPlayer.ID,
 		SecondPlayerID: game.SecondPlayer.ID,
 		Status:         string(game.Status),
@@ -42,18 +42,18 @@ func DomainToResponse(game *domainModel.Game) *response.GameResponse {
 	}
 }
 
-func ResponseToDomain(resp *response.GameResponse) domainModel.Game {
+func ResponseToDomain(resp *response.GameResponse) domain.Game {
 
-	firstPlayer := domainModel.Player{
+	firstPlayer := domain.Player{
 		ID:   resp.FirstPlayerID,
 		Icon: 1,
 	}
-	secondPlayer := domainModel.Player{
+	secondPlayer := domain.Player{
 		ID:   resp.SecondPlayerID,
 		Icon: 2,
 	}
-	winner := domainModel.Player{}
-	turn := domainModel.Player{}
+	winner := domain.Player{}
+	turn := domain.Player{}
 	switch resp.Winner {
 	case resp.FirstPlayerID:
 		winner.ID = resp.FirstPlayerID
@@ -71,10 +71,12 @@ func ResponseToDomain(resp *response.GameResponse) domainModel.Game {
 		turn.ID = resp.SecondPlayerID
 		turn.Icon = 2
 	}
-
-	return domainModel.Game{
+	boardResp := struct {
+		Cells [3][3]uint8
+	}{Cells: resp.Board}
+	return domain.Game{
 		ID:           resp.GameID,
-		Board:        resp.Board,
+		Board:        boardResp,
 		FirstPlayer:  firstPlayer,
 		SecondPlayer: secondPlayer,
 		Status:       resp.Status,
@@ -83,7 +85,7 @@ func ResponseToDomain(resp *response.GameResponse) domainModel.Game {
 	}
 }
 
-func DomainToGameInfo(game *domainModel.Game) response.GameInfo {
+func DomainToGameInfo(game *domain.Game) response.GameInfo {
 	return response.GameInfo{
 		GameID:        game.ID,
 		FirstPlayerID: game.FirstPlayer.ID,
@@ -91,7 +93,7 @@ func DomainToGameInfo(game *domainModel.Game) response.GameInfo {
 	}
 }
 
-func DomainToWaitingGamesResponse(games []*domainModel.Game) response.WaitingGamesResponse {
+func DomainToWaitingGamesResponse(games []*domain.Game) response.WaitingGamesResponse {
 	gameInfos := make([]response.GameInfo, 0, len(games))
 	for _, game := range games {
 		gameInfos = append(gameInfos, DomainToGameInfo(game))

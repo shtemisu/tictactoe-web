@@ -1,7 +1,7 @@
 package service
 
 import (
-	"tictactoe/internal/domain/model"
+	"tictactoe/internal/domain"
 )
 
 type Move struct {
@@ -16,7 +16,7 @@ type MinMaxServiceImpl struct {
 func NewMinMaxService() *MinMaxServiceImpl {
 	return &MinMaxServiceImpl{}
 }
-func checkWin(board model.Board, player uint8) bool {
+func checkWin(board domain.Board, player uint8) bool {
 	for i := range 3 {
 		if board.Cells[i][0] == player &&
 			board.Cells[i][1] == player &&
@@ -48,12 +48,12 @@ func checkWin(board model.Board, player uint8) bool {
 	return false
 }
 
-func (*MinMaxServiceImpl) GetBestMove(g model.Game) (uint8, uint8) {
+func (*MinMaxServiceImpl) GetBestMove(g domain.Game) (uint8, uint8) {
 	bestMoves := minimax(g.Board, g.CurrentTurn.Icon, 10)
 	return bestMoves.Row, bestMoves.Col
 }
 
-func minimax(board model.Board, player uint8, depth int) Move {
+func minimax(board domain.Board, player uint8, depth int) Move {
 	emptyCells := board.GetEmptyCells()
 	if checkWin(board, 1) { // ai
 		return Move{Score: 10 - depth}

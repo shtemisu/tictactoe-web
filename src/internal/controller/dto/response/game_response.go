@@ -1,18 +1,17 @@
 package response
 
 import (
-	domainModel "tictactoe/internal/domain/model"
 	"time"
 )
 
 type GameResponse struct {
-	GameID         string            `json:"id"`
-	Board          domainModel.Board `json:"board"`
-	FirstPlayerID  string            `json:"firstPlayer_ID"`
-	SecondPlayerID string            `json:"secondPlayer_ID"`
-	Status         string            `json:"status"`
-	Winner         string            `json:"winner,omitempty"`
-	CurrentTurn    string            `json:"current_turn"`
+	GameID         string      `json:"id"`
+	Board          [3][3]uint8 `json:"board"`
+	FirstPlayerID  string      `json:"firstPlayer_ID"`
+	SecondPlayerID string      `json:"secondPlayer_ID"`
+	Status         string      `json:"status"`
+	Winner         string      `json:"winner,omitempty"`
+	CurrentTurn    string      `json:"current_turn"`
 }
 
 type CreateGameResponse struct {

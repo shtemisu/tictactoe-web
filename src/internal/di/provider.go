@@ -10,8 +10,8 @@ import (
 	web "tictactoe/internal/controller"
 	"tictactoe/internal/controller/handler"
 	"tictactoe/internal/controller/middleware"
+	"tictactoe/internal/domain"
 	domainRepo "tictactoe/internal/domain/repository"
-	domainService "tictactoe/internal/domain/service"
 	db "tictactoe/internal/repository"
 	"tictactoe/internal/usecase/auth"
 	usecases "tictactoe/internal/usecase/service"
@@ -41,17 +41,17 @@ func Module() fx.Option {
 			usecases.NewMinMaxService,
 			fx.Annotate(
 				usecases.NewMinMaxService,
-				fx.As(new(domainService.MinMaxService)),
+				fx.As(new(domain.MinMaxService)),
 			),
 			usecases.NewGameService,
 			fx.Annotate(
 				usecases.NewGameService,
-				fx.As(new(domainService.GameService)),
+				fx.As(new(domain.GameService)),
 			),
 			user.NewUserService,
 			fx.Annotate(
 				user.NewUserService,
-				fx.As(new(domainService.UserService)),
+				fx.As(new(domain.UserService)),
 			),
 			fx.Annotate(func(cfg *config.Config) *jwt.JwtProvider {
 				return jwt.NewJwtProvider(cfg.JWT_Access_Secret, cfg.JWT_Refresh_Secret)
