@@ -11,7 +11,7 @@ import (
 	"tictactoe/internal/domain/model"
 	db "tictactoe/internal/domain/repository"
 	domainService "tictactoe/internal/domain/service"
-	"tictactoe/internal/repository/db/dto"
+	"tictactoe/internal/repository/dto"
 
 	"github.com/google/uuid"
 )

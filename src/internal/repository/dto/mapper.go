@@ -4,7 +4,7 @@ import (
 	"errors"
 	"log"
 	domainModel "tictactoe/internal/domain/model"
-	rp "tictactoe/internal/repository/db/model"
+	rp "tictactoe/internal/repository/model"
 	"time"
 
 	"github.com/google/uuid"

@@ -12,7 +12,7 @@ import (
 	"tictactoe/internal/controller/middleware"
 	domainRepo "tictactoe/internal/domain/repository"
 	domainService "tictactoe/internal/domain/service"
-	db "tictactoe/internal/repository/db"
+	db "tictactoe/internal/repository"
 	"tictactoe/internal/usecase/auth"
 	usecases "tictactoe/internal/usecase/service"
 	"tictactoe/internal/usecase/user"

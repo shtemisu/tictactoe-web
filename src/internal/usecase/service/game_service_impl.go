@@ -7,7 +7,7 @@ import (
 	"tictactoe/internal/domain/model"
 	db "tictactoe/internal/domain/repository"
 	"tictactoe/internal/domain/service"
-	datasource "tictactoe/internal/repository/db/dto"
+	datasource "tictactoe/internal/repository/dto"
 )
 
 type GameServiceImpl struct {

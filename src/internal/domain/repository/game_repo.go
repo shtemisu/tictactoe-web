@@ -2,7 +2,7 @@ package db
 
 import (
 	"context"
-	rp "tictactoe/internal/repository/db/model"
+	rp "tictactoe/internal/repository/model"
 )
 
 type GameRepository interface {
