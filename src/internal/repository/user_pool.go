@@ -25,7 +25,7 @@ func NewUserRepository(pool *pgxpool.Pool) *UserRepository {
 
 func (r *UserRepository) FindUserByLogin(ctx context.Context, login string) (*rp.UserModel, error) {
 	var u rp.UserModel
-	err := r.pool.QueryRow(ctx, "SELECT id, login, passwordhash FROM users WHERE login=$1", login).Scan(&u.UUID, &u.Login, &u.Password)
+	err := r.pool.QueryRow(ctx, "SELECT id, login, password_hash FROM users WHERE login=$1", login).Scan(&u.UUID, &u.Login, &u.Password)
 
 	if err != nil {
 		return nil, err
@@ -63,7 +63,7 @@ func (r *UserRepository) GetUserStats(ctx context.Context, ID string) (gamesPlay
 func (r *UserRepository) SaveUser(ctx context.Context, u rp.UserModel) error {
 	var uuid string
 	err := r.pool.QueryRow(ctx,
-		"INSERT INTO users(id, login, passwordhash, created_at, updated_at) VALUES($1, $2, $3, $4, $5) RETURNING id",
+		"INSERT INTO users(id, login, password_hash, created_at, updated_at) VALUES($1, $2, $3, $4, $5) RETURNING id",
 		u.UUID, u.Login, u.Password, u.CreatedAt, u.UpdatedAt).Scan(&uuid)
 	if err != nil {
 		log.Printf("%s\n", err)

@@ -12,6 +12,7 @@ import (
 	"tictactoe/internal/controller/middleware"
 	"tictactoe/internal/domain"
 	domainRepo "tictactoe/internal/domain/repository"
+	"tictactoe/internal/migrator"
 	db "tictactoe/internal/repository"
 	"tictactoe/internal/usecase/auth"
 	usecases "tictactoe/internal/usecase/service"
@@ -120,17 +121,20 @@ func NewPostgresPool(lc fx.Lifecycle, cfg *config.Config) (*pgxpool.Pool, error)
 	return pool, nil
 }
 
-func InitDatabase(pool *pgxpool.Pool) error {
-	_, err := pool.Exec(context.Background(), initGameTable)
-	if err != nil {
-		log.Printf("failed to create table with games in db %v", err)
-		return err
+func InitDatabase(pool *pgxpool.Pool, cfg *config.Config) error {
+	log.Println("checking database connection...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := pool.Ping(ctx); err != nil {
+		return fmt.Errorf("database ping failed: %w", err)
 	}
-	_, err1 := pool.Exec(context.Background(), initUserTable)
-	if err1 != nil {
-		log.Printf("failed to create table with users in db: %v", err)
-		return err
+	log.Println("database connection established")
+	if err := migrator.RunMigrations(cfg); err != nil {
+		log.Printf("failed to run migrations: %s", err)
+		return fmt.Errorf("failed to run migrations: %w", err)
 	}
-	log.Println("Таблицы базы данных проверены/созданы")
+	log.Println("database migrations completed successfully")
 	return nil
 }

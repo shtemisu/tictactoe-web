@@ -57,6 +57,9 @@ func (gs *GameServiceImpl) JoinToGame(ctx context.Context, secondPlayerID string
 	if err != nil {
 		return nil, err
 	}
+	if gameID == game.FirstPlayerID {
+		return nil, errors.New("Игра с самим собой невозможна")
+	}
 	domainModel, err := datasource.GameToDomain(game)
 	if err != nil {
 		return nil, err
