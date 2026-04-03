@@ -6,7 +6,7 @@ import (
 	"log"
 
 	domainRepo "tictactoe/internal/domain/repository"
-	rp "tictactoe/internal/repository/db/model"
+	rp "tictactoe/internal/repository/model"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
