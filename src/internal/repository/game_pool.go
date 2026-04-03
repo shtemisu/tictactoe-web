@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	rp "tictactoe/internal/repository/db/model"
+	rp "tictactoe/internal/repository/model"
 
 	"context"
 
