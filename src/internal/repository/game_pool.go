@@ -72,11 +72,15 @@ func (r *GameRepositoryImpl) FindAllWaitingGames(ctx context.Context) ([]*rp.Gam
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, errors.New("failed to iterate games")
+		return nil, errors.New("failed to scan games")
 	}
 	return games, nil
 }
 
+func (r *GameRepositoryImpl) GetGameHistoryByPlayerID(ctx context.Context, playerID string) (*rp.GameModel, error) {
+	var games []*rp.GameModel
+	err := r.pool.QueryRow(ctx, "SELECT id FROM games WHERE status='game_over'")
+}
 func (r *GameRepositoryImpl) SaveGame(ctx context.Context, g rp.GameModel) error {
 	var id string
 	fmt.Println(g.SecondPlayerID)
@@ -98,20 +102,6 @@ func (r *GameRepositoryImpl) UpdateGame(ctx context.Context, g rp.GameModel) err
 		return errors.New("failed to update game")
 	} else {
 		log.Printf("game with ID: %s was update", g.ID)
-	}
-	if result.RowsAffected() == 0 {
-		return errors.New("game not found")
-	}
-	return nil
-}
-
-func (r *GameRepositoryImpl) RemoveGame(ctx context.Context, gameID string) error {
-	query := "DELETE FROM games WHERE id = $1"
-	result, err := r.pool.Exec(ctx, query, gameID)
-	if err != nil {
-		return errors.New("failed to delete game")
-	} else {
-		log.Printf("game with ID: %s was delete", gameID)
 	}
 	if result.RowsAffected() == 0 {
 		return errors.New("game not found")
