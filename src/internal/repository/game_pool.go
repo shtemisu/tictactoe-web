@@ -82,8 +82,8 @@ func (r *GameRepositoryImpl) FindAllWaitingGames(ctx context.Context) ([]*rp.Gam
 
 func (r *GameRepositoryImpl) GetGameHistoryByPlayerID(ctx context.Context, playerID string) ([]string, error) {
 	var gamesID []string
-	query := "SELECT id FROM games WHERE status is DISTINCT FROM 'waiting' AND ($1 IN (firstPlayer_id, secondPlayer_id))"
-	rows, err := r.pool.Query(ctx, query)
+	query := "SELECT id FROM games WHERE (status != 'waiting' AND status != 'playing') AND ($1 IN (firstPlayer_id, secondPlayer_id))"
+	rows, err := r.pool.Query(ctx, query, playerID)
 	if err != nil {
 		return nil, err
 	}
