@@ -20,6 +20,10 @@ type CreateGameResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type GameHistoryByID struct {
+	GamesID []string `json:"games_id"`
+}
+
 type WaitingGamesResponse struct {
 	Games []GameInfo `json:"games"`
 	Count int        `json:"count"`

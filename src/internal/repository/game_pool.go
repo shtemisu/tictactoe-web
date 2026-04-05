@@ -4,12 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	db "tictactoe/internal/domain/repository"
 	rp "tictactoe/internal/repository/model"
 
 	"context"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+var _ db.GameRepository = (*GameRepositoryImpl)(nil)
 
 type GameRepositoryImpl struct {
 	pool *pgxpool.Pool
@@ -77,9 +80,22 @@ func (r *GameRepositoryImpl) FindAllWaitingGames(ctx context.Context) ([]*rp.Gam
 	return games, nil
 }
 
-func (r *GameRepositoryImpl) GetGameHistoryByPlayerID(ctx context.Context, playerID string) (*rp.GameModel, error) {
-	var games []*rp.GameModel
-	err := r.pool.QueryRow(ctx, "SELECT id FROM games WHERE status='game_over'")
+func (r *GameRepositoryImpl) GetGameHistoryByPlayerID(ctx context.Context, playerID string) ([]string, error) {
+	var gamesID []string
+	query := "SELECT id FROM games WHERE status is DISTINCT FROM 'waiting' AND ($1 IN (firstPlayer_id, secondPlayer_id))"
+	rows, err := r.pool.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var gameID string
+		err := rows.Scan(&gameID)
+		if err != nil {
+			continue
+		}
+		gamesID = append(gamesID, gameID)
+	}
+	return gamesID, nil
 }
 func (r *GameRepositoryImpl) SaveGame(ctx context.Context, g rp.GameModel) error {
 	var id string

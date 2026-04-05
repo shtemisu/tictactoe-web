@@ -114,6 +114,14 @@ func (gs *GameServiceImpl) GetAllWaitingGames(ctx context.Context) ([]*domain.Ga
 	return domainGames, nil
 }
 
+func (gs *GameServiceImpl) GetGameHistoryByPlayerID(ctx context.Context, playerID string) (*[]string, error) {
+	gamesID, err := gs.repo.GetGameHistoryByPlayerID(ctx, playerID)
+	if err != nil {
+		return nil, err
+	}
+	return &gamesID, nil
+}
+
 func (gs *GameServiceImpl) updateGameStatus(ctx context.Context, game *domain.Game) error {
 	if game.SecondPlayer.ID != "" && game.FirstPlayer.ID != "" && game.Status == domain.StatusWaiting {
 		game.Status = domain.StatusPlaying

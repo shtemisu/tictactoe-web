@@ -120,6 +120,16 @@ func (h *GameHandler) GetWaitingGames(w http.ResponseWriter, r *http.Request) {
 	h.writeJSON(w, http.StatusOK, resp)
 }
 
+func (h *GameHandler) GetGameHistoryByPlayerID(w http.ResponseWriter, r *http.Request) {
+	userID := r.PathValue("playerID")
+	gamesID, err := h.gameService.GetGameHistoryByPlayerID(r.Context(), userID)
+	if err != nil {
+		h.writeError(w, http.StatusNotFound, "games not found")
+		return
+	}
+	h.writeJSON(w, http.StatusOK, gamesID)
+}
+
 func (h *GameHandler) MainPage(w http.ResponseWriter, r *http.Request) {
 	resp := struct {
 		Info []string `json:"info"`
@@ -148,7 +158,7 @@ func (h *GameHandler) PlayTurn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if success, err := h.gameService.DoMove(r.Context(), gameID, uint8(moveReq.Row), uint8(moveReq.Col)); err != nil || !success {
-		h.writeError(w, http.StatusNotAcceptable, err.Error())
+		h.writeError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -162,7 +172,7 @@ func (h *GameHandler) PlayTurn(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if success, err := h.gameService.DoMove(r.Context(), gameID, x, y); err != nil || !success {
-			h.writeError(w, http.StatusNotAcceptable, err.Error())
+			h.writeError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 

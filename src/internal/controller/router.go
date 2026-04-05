@@ -17,6 +17,8 @@ func NewRouter(handler handler.GameHandler, authHandler middleware.AuthHandler, 
 	mux.HandleFunc("POST /api/game/ai", authHandler.Authenticate(handler.CreateGameWithAI))
 	mux.HandleFunc("POST /api/game/multiplayer", authHandler.Authenticate(handler.CreateMultiplayerGame))
 	mux.HandleFunc("POST /api/game/multiplayer/{join}", authHandler.Authenticate(handler.JoinToGame))
+
+	mux.HandleFunc("GET /api/game/playerID/{playerID}", handler.GetGameHistoryByPlayerID)
 	mux.HandleFunc("GET /api/game/available", handler.GetWaitingGames)
 
 	mux.HandleFunc("POST /api/game/{gameID}", authHandler.Authenticate(handler.PlayTurn))
