@@ -9,3 +9,8 @@ type UserModel struct {
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
+
+type LeaderBoard struct {
+	UUID    string  `db:"id"`
+	Winrate float32 `db:"winrate"`
+}

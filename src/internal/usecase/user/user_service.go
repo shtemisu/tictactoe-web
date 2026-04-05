@@ -89,6 +89,14 @@ func (s *UserService) GetUserInfo(ctx context.Context, ID string) (*domain.UserR
 	}, nil
 }
 
+func (s *UserService) GetLeaderBoard(ctx context.Context, limit string) ([]domain.LeaderBoardResponse, error) {
+	leaderBoard, err := s.userRepo.GetLeaderBoard(ctx, limit)
+	if err != nil {
+		return nil, err
+	}
+	return leaderBoard, nil
+}
+
 func (u *UserService) ValidateCredentials(ctx context.Context, login string, password string) (uuid.UUID, error) {
 	user, err := u.GetUserBylogin(ctx, login)
 	if err != nil {

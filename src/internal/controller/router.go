@@ -17,14 +17,13 @@ func NewRouter(handler handler.GameHandler, authHandler middleware.AuthHandler, 
 	mux.HandleFunc("POST /api/game/ai", authHandler.Authenticate(handler.CreateGameWithAI))
 	mux.HandleFunc("POST /api/game/multiplayer", authHandler.Authenticate(handler.CreateMultiplayerGame))
 	mux.HandleFunc("POST /api/game/multiplayer/{join}", authHandler.Authenticate(handler.JoinToGame))
-
-	mux.HandleFunc("GET /api/game/playerID/{playerID}", handler.GetGameHistoryByPlayerID)
 	mux.HandleFunc("GET /api/game/available", handler.GetWaitingGames)
-
 	mux.HandleFunc("POST /api/game/{gameID}", authHandler.Authenticate(handler.PlayTurn))
 	mux.HandleFunc("GET /api/game/{gameID}", authHandler.Authenticate(handler.GetGame))
 
+	mux.HandleFunc("GET /api/user/history/{playerID}", handler.GetGameHistoryByPlayerID)
 	mux.HandleFunc("GET /api/user/me", authHandler.Authenticate(userHandler.GetUserInfoByAccessToken))
-	mux.HandleFunc("GET /api/user/{userID}", userHandler.GetUserById)
+	mux.HandleFunc("GET /api/user/{userID}", authHandler.Authenticate(userHandler.GetUserById))
+	mux.HandleFunc("GET /api/user/leaderboard/{limit}", authHandler.Authenticate(userHandler.GetLeaderBoard))
 	return mux
 }

@@ -97,6 +97,7 @@ func (r *GameRepositoryImpl) GetGameHistoryByPlayerID(ctx context.Context, playe
 	}
 	return gamesID, nil
 }
+
 func (r *GameRepositoryImpl) SaveGame(ctx context.Context, g rp.GameModel) error {
 	var id string
 	fmt.Println(g.SecondPlayerID)

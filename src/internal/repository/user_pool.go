@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 
+	"tictactoe/internal/domain"
 	domainRepo "tictactoe/internal/domain/repository"
 	rp "tictactoe/internal/repository/model"
 
@@ -58,6 +59,38 @@ func (r *UserRepository) GetUserStats(ctx context.Context, ID string) (gamesPlay
 	}
 
 	return gamesPlayed, wins, nil
+}
+
+func (r *UserRepository) GetLeaderBoard(ctx context.Context, limit string) ([]domain.LeaderBoardResponse, error) {
+	var leaderBoard []domain.LeaderBoardResponse
+	query := `
+		SELECT id, ROUND(
+			COUNT(CASE WHEN g.winner = u.id THEN 1 END)::DECIMAL /
+			NULLIF(COUNT(DISTINCT g.id), 0) * 100,
+			2
+		) as winrate
+		FROM users u
+		LEFT JOIN games g ON 
+			(g.firstPlayer_id = u.id OR g.secondPlayer_id = u.id)
+			AND g.status IN ('game_over', 'draw')
+		GROUP BY u.id
+		HAVING COUNT(DISTINCT g.id) > 0
+		ORDER BY winrate DESC
+		LIMIT $1;
+	`
+	rows, err := r.pool.Query(ctx, query, limit)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var leader domain.LeaderBoardResponse
+		err := rows.Scan(&leader)
+		if err != nil {
+			continue
+		}
+		leaderBoard = append(leaderBoard, leader)
+	}
+	return leaderBoard, nil
 }
 
 func (r *UserRepository) SaveUser(ctx context.Context, u rp.UserModel) error {

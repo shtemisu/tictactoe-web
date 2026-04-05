@@ -44,13 +44,29 @@ func (uh *UserHandler) GetUserInfoByAccessToken(w http.ResponseWriter, r *http.R
 func (uh *UserHandler) GetUserById(w http.ResponseWriter, r *http.Request) {
 	userID := r.PathValue("userID")
 	if userID == "" {
-		uh.writeError(w, http.StatusNotFound, "user not found")
+		uh.writeError(w, http.StatusBadRequest, "bad request")
+		return
 	}
 	userInfo, err := uh.UserService.GetUserInfo(r.Context(), userID)
 	if err != nil {
 		uh.writeError(w, http.StatusNotFound, err.Error())
+		return
 	}
 	uh.writeJSON(w, http.StatusOK, userInfo)
+}
+
+func (uh *UserHandler) GetLeaderBoard(w http.ResponseWriter, r *http.Request) {
+	limit := r.PathValue("limit")
+	if limit == "" {
+		uh.writeError(w, http.StatusBadRequest, "bad request")
+		return
+	}
+	leaderBoard, err := uh.UserService.GetLeaderBoard(r.Context(), limit)
+	if err != nil {
+		uh.writeError(w, http.StatusInternalServerError, "internal server error")
+		return
+	}
+	uh.writeJSON(w, http.StatusOK, leaderBoard)
 }
 
 func (uh *UserHandler) writeJSON(w http.ResponseWriter, status int, data any) {

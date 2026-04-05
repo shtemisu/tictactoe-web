@@ -19,10 +19,16 @@ type UserResponse struct {
 	Wins        int    `json:"wins"`
 }
 
+type LeaderBoardResponse struct {
+	UUID    string  `json:"id"`
+	Winrate float32 `json:"winrate"`
+}
+
 type UserService interface {
 	CreateUser(ctx context.Context, req SignUpRequest) error
 	GetUserBylogin(ctx context.Context, login string) (*User, error)
 	GetUserInfo(ctx context.Context, ID string) (*UserResponse, error)
+	GetLeaderBoard(ctx context.Context, limit string) ([]LeaderBoardResponse, error)
 	ValidateCredentials(ctx context.Context, login, password string) (uuid.UUID, error)
 }
 
