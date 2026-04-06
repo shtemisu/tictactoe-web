@@ -64,7 +64,7 @@ func (r *UserRepository) GetUserStats(ctx context.Context, ID string) (gamesPlay
 func (r *UserRepository) GetLeaderBoard(ctx context.Context, limit string) ([]domain.LeaderBoardResponse, error) {
 	var leaderBoard []domain.LeaderBoardResponse
 	query := `
-		SELECT id, ROUND(
+		SELECT u.id, ROUND(
 			COUNT(CASE WHEN g.winner = u.id THEN 1 END)::DECIMAL /
 			NULLIF(COUNT(DISTINCT g.id), 0) * 100,
 			2
@@ -82,9 +82,10 @@ func (r *UserRepository) GetLeaderBoard(ctx context.Context, limit string) ([]do
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var leader domain.LeaderBoardResponse
-		err := rows.Scan(&leader)
+		err := rows.Scan(&leader.UUID, &leader.Winrate)
 		if err != nil {
 			continue
 		}

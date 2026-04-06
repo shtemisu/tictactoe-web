@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strings"
 	"tictactoe/internal/controller/dto/response"
@@ -57,6 +58,7 @@ func (uh *UserHandler) GetUserById(w http.ResponseWriter, r *http.Request) {
 
 func (uh *UserHandler) GetLeaderBoard(w http.ResponseWriter, r *http.Request) {
 	limit := r.PathValue("limit")
+	log.Println("limit value:", limit)
 	if limit == "" {
 		uh.writeError(w, http.StatusBadRequest, "bad request")
 		return
