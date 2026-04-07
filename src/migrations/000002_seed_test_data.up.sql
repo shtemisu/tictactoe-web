@@ -15,7 +15,7 @@ INSERT INTO games (id, board, firstPlayer_id, secondPlayer_id, current_turn, sta
 
 -- GAME OVER
 INSERT INTO games (id, board, firstPlayer_id, secondPlayer_id, current_turn, status, winner, created_at, updated_at) VALUES
-    ('eeeeeeee-eeee-eeee-eeee-eeeeee2eeeeee', ARRAY[1,1,1,2,2,0,0,0,0], '11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'game_over', '11111111-1111-1111-1111-111111111111',
+    ('eeeeeeee-eeee-eeee-eeee-eeeeee2eeeee', ARRAY[1,1,1,2,2,0,0,0,0], '11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'game_over', '11111111-1111-1111-1111-111111111111',
     NOW(), NOW());
 
 INSERT INTO games (id, board, firstPlayer_id, secondPlayer_id, current_turn, status, winner, created_at, updated_at) VALUES
