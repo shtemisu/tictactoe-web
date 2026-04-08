@@ -12,12 +12,12 @@ import (
 	"tictactoe/internal/controller/middleware"
 	"tictactoe/internal/domain"
 	domainRepo "tictactoe/internal/domain/repository"
-	"tictactoe/internal/migrator"
 	db "tictactoe/internal/repository"
 	"tictactoe/internal/usecase/auth"
 	usecases "tictactoe/internal/usecase/service"
 	"tictactoe/internal/usecase/user"
 	"tictactoe/pkg/jwt"
+	"tictactoe/pkg/migrator"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
