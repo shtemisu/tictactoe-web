@@ -102,7 +102,7 @@ func (h *GameHandler) GetGame(w http.ResponseWriter, r *http.Request) {
 	}
 	game, err := h.gameService.GetGame(r.Context(), gameID)
 	if err != nil {
-		h.writeError(w, http.StatusNotFound, "game not found")
+		h.writeError(w, http.StatusNotFound, err.Error())
 		return
 	}
 	resp := mapper.DomainToResponse(game)
@@ -164,7 +164,7 @@ func (h *GameHandler) PlayTurn(w http.ResponseWriter, r *http.Request) {
 
 	game, _ := h.gameService.GetGame(r.Context(), gameID)
 
-	if game.SecondPlayer.ID == "minmax" && game.Status == domain.StatusPlaying {
+	if game.SecondPlayer.ID == domain.MinmaxUUID && game.Status == domain.StatusPlaying {
 		x, y, err := h.gameService.GetNextMove(r.Context(), gameID)
 		if err != nil {
 			h.writeError(w, http.StatusInternalServerError, err.Error())

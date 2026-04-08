@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"log"
@@ -24,18 +25,51 @@ func NewGameRepository(pool *pgxpool.Pool) *GameRepositoryImpl {
 
 func (r *GameRepositoryImpl) FindGameById(ctx context.Context, id string) (*rp.GameModel, error) {
 	var g rp.GameModel
-	err := r.pool.QueryRow(ctx, "SELECT * FROM games WHERE id=$1", id).Scan(&g.ID, &g.Board.Cells, &g.FirstPlayerID, &g.SecondPlayerID,
-		&g.CurrentTurn, &g.Status, &g.Winner, &g.CreatedAt, &g.UpdatedAt)
+
+	query := `SELECT id, board, firstPlayer_id, secondPlayer_id, current_turn, status, winner, created_at, updated_at 
+              FROM games WHERE id = $1`
+
+	err := r.pool.QueryRow(ctx, query, id).Scan(
+		&g.ID,
+		&g.Board.Cells,
+		&g.FirstPlayerID,
+		&g.SecondPlayerID,
+		&g.CurrentTurn,
+		&g.Status,
+		&g.Winner,
+		&g.CreatedAt,
+		&g.UpdatedAt,
+	)
+
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("game not found")
+		}
+		log.Printf("Error finding game: %v", err)
 		return nil, err
 	}
+
 	return &g, nil
 }
 
 func (r *GameRepositoryImpl) FindGameByWaitingStatus(ctx context.Context, id string) (*rp.GameModel, error) {
 	var g rp.GameModel
-	err := r.pool.QueryRow(ctx, "SELECT * FROM games WHERE status='waiting' AND id=$1", id).Scan(&g.ID, &g.Board.Cells,
-		&g.FirstPlayerID, &g.SecondPlayerID, &g.CurrentTurn, &g.Status, &g.Winner, &g.CreatedAt, &g.UpdatedAt)
+
+	query := `SELECT id, board, firstPlayer_id, secondPlayer_id, current_turn, status, winner, created_at, updated_at 
+              FROM games WHERE status = 'waiting' AND id = $1`
+
+	err := r.pool.QueryRow(ctx, query, id).Scan(
+		&g.ID,
+		&g.Board.Cells,
+		&g.FirstPlayerID,
+		&g.SecondPlayerID,
+		&g.CurrentTurn,
+		&g.Status,
+		&g.Winner,
+		&g.CreatedAt,
+		&g.UpdatedAt,
+	)
+
 	if err != nil {
 		return nil, err
 	}
@@ -100,28 +134,59 @@ func (r *GameRepositoryImpl) GetGameHistoryByPlayerID(ctx context.Context, playe
 
 func (r *GameRepositoryImpl) SaveGame(ctx context.Context, g rp.GameModel) error {
 	var id string
-	fmt.Println(g.SecondPlayerID)
-	query := "INSERT INTO games(id, board, firstPlayer_id, secondPlayer_id, current_turn, status, winner, created_at, updated_at) VALUES($1, $2, $3, $4, $5, $6, $7, NOW(), NOW()) RETURNING id"
-	err := r.pool.QueryRow(ctx, query, g.ID, g.Board.Cells, g.FirstPlayerID, g.SecondPlayerID, g.CurrentTurn, g.Status, g.Winner).Scan(&id)
+
+	query := `INSERT INTO games(id, board, firstPlayer_id, secondPlayer_id, current_turn, status, winner, created_at, updated_at) 
+              VALUES($1, $2, $3, $4, $5, $6, $7, NOW(), NOW()) RETURNING id`
+
+	err := r.pool.QueryRow(ctx, query,
+		g.ID,
+		g.Board.Cells,
+		g.FirstPlayerID,
+		g.SecondPlayerID, // sql.NullString
+		g.CurrentTurn,    // sql.NullString
+		g.Status,
+		g.Winner, // sql.NullString
+	).Scan(&id)
+
 	if err != nil {
-		log.Printf("%s\n", err)
-		return errors.New("failed to save game in db")
-	} else {
-		log.Printf("game with ID: %s was save", id)
+		log.Printf("Error saving game: %v", err)
+		return fmt.Errorf("failed to save game in db: %w", err)
 	}
+
+	log.Printf("game with ID: %s was saved", id)
 	return nil
 }
 
 func (r *GameRepositoryImpl) UpdateGame(ctx context.Context, g rp.GameModel) error {
-	query := "UPDATE games SET board = $1, firstPlayer_id = $2, secondPlayer_id = $3, winner = $4, status = $5, current_turn = $6, updated_at = NOW() WHERE id = $7"
-	result, err := r.pool.Exec(ctx, query, g.Board.Cells, g.FirstPlayerID, g.SecondPlayerID, g.Winner, g.Status, g.CurrentTurn, g.ID)
+	query := `UPDATE games SET 
+                board = $1, 
+                firstPlayer_id = $2, 
+                secondPlayer_id = $3, 
+                winner = $4, 
+                status = $5, 
+                current_turn = $6, 
+                updated_at = NOW() 
+              WHERE id = $7`
+
+	result, err := r.pool.Exec(ctx, query,
+		g.Board.Cells,
+		g.FirstPlayerID,
+		g.SecondPlayerID,
+		g.Winner,
+		g.Status,
+		g.CurrentTurn,
+		g.ID,
+	)
+
 	if err != nil {
-		return errors.New("failed to update game")
-	} else {
-		log.Printf("game with ID: %s was update", g.ID)
+		log.Printf("Error updating game: %v", err)
+		return fmt.Errorf("failed to update game: %w", err)
 	}
+
 	if result.RowsAffected() == 0 {
-		return errors.New("game not found")
+		return fmt.Errorf("game with id %s not found", g.ID)
 	}
+
+	log.Printf("game with ID: %s was updated", g.ID)
 	return nil
 }

@@ -88,7 +88,7 @@ func (gs *GameServiceImpl) GetGame(ctx context.Context, gameID string) (*domain.
 	value, err1 := gs.repo.FindGameById(ctx, gameID)
 
 	if err1 != nil {
-		return nil, errors.New("Invalid game data")
+		return nil, err1
 	}
 	domainModel, err2 := datasource.GameToDomain(value)
 	if err2 != nil {

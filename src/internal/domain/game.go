@@ -12,6 +12,7 @@ const (
 	StatusDraw     string = "draw"
 	StatusGameOver string = "game_over"
 	StatusWaiting  string = "waiting"
+	MinmaxUUID     string = "55555555-5555-5555-5555-555555555555"
 )
 
 type Player struct {
@@ -43,7 +44,7 @@ type GameService interface {
 
 func InitGameWithAI(firstPlayer Player) *Game {
 	minmax := Player{
-		ID:   "minmax",
+		ID:   MinmaxUUID,
 		Icon: 2, // O
 	}
 	return &Game{
@@ -53,19 +54,28 @@ func InitGameWithAI(firstPlayer Player) *Game {
 		SecondPlayer: minmax,
 		CurrentTurn:  firstPlayer,
 		Status:       StatusPlaying,
-		Winner:       Player{},
+		Winner: Player{
+			ID:   uuid.Nil.String(),
+			Icon: 3,
+		},
 	}
 }
 
 func InitMultiplayerGame(firstPlayer Player) *Game {
 	return &Game{
-		ID:           uuid.New().String(),
-		Board:        InitBoard(),
-		FirstPlayer:  firstPlayer,
-		SecondPlayer: Player{},
-		CurrentTurn:  firstPlayer,
-		Status:       StatusWaiting,
-		Winner:       Player{},
+		ID:          uuid.New().String(),
+		Board:       InitBoard(),
+		FirstPlayer: firstPlayer,
+		SecondPlayer: Player{
+			ID:   uuid.Nil.String(),
+			Icon: 4,
+		},
+		CurrentTurn: firstPlayer,
+		Status:      StatusWaiting,
+		Winner: Player{
+			ID:   uuid.Nil.String(),
+			Icon: 3,
+		},
 	}
 }
 
