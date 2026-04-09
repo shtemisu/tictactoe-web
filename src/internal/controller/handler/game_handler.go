@@ -135,10 +135,6 @@ func (h *GameHandler) MainPage(w http.ResponseWriter, r *http.Request) {
 		Info []string `json:"info"`
 	}{Info: []string{
 		"Welcome! It is main page of tictactoe game",
-		"Methods:",
-		"GET /",
-		"POST /game/{gameID}",
-		"GET /game/{gameID}",
 	}}
 	h.writeJSON(w, http.StatusOK, resp)
 }
