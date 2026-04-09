@@ -8,6 +8,7 @@ import (
 	db "tictactoe/internal/domain/repository"
 
 	datasource "tictactoe/internal/repository/dto"
+	"tictactoe/internal/repository/model"
 )
 
 type GameServiceImpl struct {
@@ -114,12 +115,12 @@ func (gs *GameServiceImpl) GetAllWaitingGames(ctx context.Context) ([]*domain.Ga
 	return domainGames, nil
 }
 
-func (gs *GameServiceImpl) GetGameHistoryByPlayerID(ctx context.Context, playerID string) (*[]string, error) {
-	gamesID, err := gs.repo.GetGameHistoryByPlayerID(ctx, playerID)
+func (gs *GameServiceImpl) GetGameHistoryByPlayerID(ctx context.Context, playerID string) ([]model.EndedGames, error) {
+	endedGames, err := gs.repo.GetGameHistoryByPlayerID(ctx, playerID)
 	if err != nil {
 		return nil, err
 	}
-	return &gamesID, nil
+	return endedGames, nil
 }
 
 func (gs *GameServiceImpl) updateGameStatus(ctx context.Context, game *domain.Game) error {

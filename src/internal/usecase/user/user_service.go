@@ -10,6 +10,7 @@ import (
 	"tictactoe/internal/domain"
 	db "tictactoe/internal/domain/repository"
 	"tictactoe/internal/repository/dto"
+	"tictactoe/internal/repository/model"
 
 	"github.com/google/uuid"
 )
@@ -87,6 +88,14 @@ func (s *UserService) GetUserInfo(ctx context.Context, ID string) (*domain.UserR
 		GamesPlayed: gamesPlayed,
 		Wins:        wins,
 	}, nil
+}
+
+func (s *UserService) GetGameHistoryByID(ctx context.Context, ID string) ([]model.EndedGames, error) {
+	endedGames, err := s.userRepo.GetGameHistoryByPlayerID(ctx, ID)
+	if err != nil {
+		return nil, err
+	}
+	return endedGames, nil
 }
 
 func (s *UserService) GetLeaderBoard(ctx context.Context, limit string) ([]domain.LeaderBoardResponse, error) {

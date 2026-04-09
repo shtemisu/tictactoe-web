@@ -3,6 +3,7 @@ package domain
 import (
 	"context"
 	"errors"
+	"tictactoe/internal/repository/model"
 
 	"github.com/google/uuid"
 )
@@ -36,7 +37,7 @@ type GameService interface {
 	JoinToGame(ctx context.Context, secondPlayerID string, gameID string) (*Game, error)
 	GetGame(ctx context.Context, gameID string) (*Game, error)
 	GetAllWaitingGames(ctx context.Context) ([]*Game, error)
-	GetGameHistoryByPlayerID(ctx context.Context, playerID string) (*[]string, error)
+	GetGameHistoryByPlayerID(ctx context.Context, playerID string) ([]model.EndedGames, error)
 	GetTurn(ctx context.Context, gameID string) (uint8, error)
 	DoMove(ctx context.Context, gameID string, row uint8, col uint8) (bool, error)
 	GetNextMove(ctx context.Context, gameID string) (uint8, uint8, error)

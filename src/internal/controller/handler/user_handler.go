@@ -22,7 +22,7 @@ func NewUserHandler(us *user.UserService, jp *jwt.JwtProvider) *UserHandler {
 	}
 }
 
-func (uh *UserHandler) GetUserInfoByAccessToken(w http.ResponseWriter, r *http.Request) {
+func (uh *UserHandler) GetGameHistoryByAccessToken(w http.ResponseWriter, r *http.Request) {
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
 		uh.writeError(w, http.StatusBadRequest, "Bad request")
@@ -34,7 +34,7 @@ func (uh *UserHandler) GetUserInfoByAccessToken(w http.ResponseWriter, r *http.R
 		uh.writeError(w, http.StatusNotFound, err.Error())
 		return
 	}
-	userResp, err := uh.UserService.GetUserInfo(r.Context(), userID)
+	userResp, err := uh.UserService.GetGameHistoryByID(r.Context(), userID)
 	if err != nil {
 		uh.writeError(w, http.StatusNotFound, err.Error())
 		return

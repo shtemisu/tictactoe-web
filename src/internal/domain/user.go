@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"tictactoe/internal/repository/model"
 
 	"github.com/google/uuid"
 )
@@ -30,6 +31,7 @@ type UserService interface {
 	GetUserInfo(ctx context.Context, ID string) (*UserResponse, error)
 	GetLeaderBoard(ctx context.Context, limit string) ([]LeaderBoardResponse, error)
 	ValidateCredentials(ctx context.Context, login, password string) (uuid.UUID, error)
+	GetGameHistoryByID(ctx context.Context, ID string) ([]model.EndedGames, error)
 }
 
 type SignUpRequest struct {

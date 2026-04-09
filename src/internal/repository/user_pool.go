@@ -7,6 +7,7 @@ import (
 
 	"tictactoe/internal/domain"
 	domainRepo "tictactoe/internal/domain/repository"
+	"tictactoe/internal/repository/model"
 	rp "tictactoe/internal/repository/model"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -42,6 +43,25 @@ func (r *UserRepository) FindUserByID(ctx context.Context, ID string) (*rp.UserM
 		return nil, err
 	}
 	return &u, nil
+}
+
+func (r *UserRepository) GetGameHistoryByPlayerID(ctx context.Context, playerID string) ([]model.EndedGames, error) {
+
+	var endedGames []model.EndedGames
+	query := "SELECT id, status FROM games WHERE (status != 'waiting' AND status != 'playing') AND ($1 IN (firstPlayer_id, secondPlayer_id))"
+	rows, err := r.pool.Query(ctx, query, playerID)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var endedGame model.EndedGames
+		err := rows.Scan(&endedGame.ID, &endedGame.Status)
+		if err != nil {
+			continue
+		}
+		endedGames = append(endedGames, endedGame)
+	}
+	return endedGames, nil
 }
 
 func (r *UserRepository) GetUserStats(ctx context.Context, ID string) (gamesPlayed int, wins int, err error) {

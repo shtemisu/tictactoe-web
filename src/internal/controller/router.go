@@ -24,7 +24,7 @@ func NewRouter(handler handler.GameHandler, authHandler middleware.AuthHandler, 
 	mux.HandleFunc("GET /api/game/available", handler.GetWaitingGames)                  //
 
 	mux.HandleFunc("GET /api/user/history/{playerID}", handler.GetGameHistoryByPlayerID)                      // переделать вывод
-	mux.HandleFunc("GET /api/user/me", authHandler.Authenticate(userHandler.GetUserInfoByAccessToken))        //
+	mux.HandleFunc("GET /api/user/me", authHandler.Authenticate(userHandler.GetGameHistoryByAccessToken))     //
 	mux.HandleFunc("GET /api/user/{userID}", authHandler.Authenticate(userHandler.GetUserById))               //
 	mux.HandleFunc("GET /api/user/leaderboard/{limit}", authHandler.Authenticate(userHandler.GetLeaderBoard)) //
 	return mux

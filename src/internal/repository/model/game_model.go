@@ -16,3 +16,8 @@ type GameModel struct {
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 }
+
+type EndedGames struct {
+	ID     string
+	Status string
+}

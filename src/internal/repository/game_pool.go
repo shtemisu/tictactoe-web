@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	db "tictactoe/internal/domain/repository"
+	"tictactoe/internal/repository/model"
 	rp "tictactoe/internal/repository/model"
 
 	"context"
@@ -114,22 +115,23 @@ func (r *GameRepositoryImpl) FindAllWaitingGames(ctx context.Context) ([]*rp.Gam
 	return games, nil
 }
 
-func (r *GameRepositoryImpl) GetGameHistoryByPlayerID(ctx context.Context, playerID string) ([]string, error) {
-	var gamesID []string
-	query := "SELECT id FROM games WHERE (status != 'waiting' AND status != 'playing') AND ($1 IN (firstPlayer_id, secondPlayer_id))"
+func (r *GameRepositoryImpl) GetGameHistoryByPlayerID(ctx context.Context, playerID string) ([]model.EndedGames, error) {
+
+	var endedGames []model.EndedGames
+	query := "SELECT id, status FROM games WHERE (status != 'waiting' AND status != 'playing') AND ($1 IN (firstPlayer_id, secondPlayer_id))"
 	rows, err := r.pool.Query(ctx, query, playerID)
 	if err != nil {
 		return nil, err
 	}
 	for rows.Next() {
-		var gameID string
-		err := rows.Scan(&gameID)
+		var endedGame model.EndedGames
+		err := rows.Scan(&endedGame)
 		if err != nil {
 			continue
 		}
-		gamesID = append(gamesID, gameID)
+		endedGames = append(endedGames, endedGame)
 	}
-	return gamesID, nil
+	return endedGames, nil
 }
 
 func (r *GameRepositoryImpl) SaveGame(ctx context.Context, g rp.GameModel) error {
