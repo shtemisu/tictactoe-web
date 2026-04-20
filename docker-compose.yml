@@ -1,0 +1,42 @@
+services: 
+  postgres-tictactoe:
+    image: postgres:17-alpine
+    container_name: postgres-tictactoe
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=tictactoe
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - tictactoe-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+
+      start_period: 10s
+
+  tictactoe:
+    build:
+      context: .
+      dockerfile: build/app/Dockerfile
+    image: tictactoe-web:0.1
+    container_name: tictactoe_cont
+    env_file:
+      - ./.env
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres-tictactoe:
+        condition: service_healthy
+    networks:
+      - tictactoe-network
+
+networks:
+  tictactoe-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  
