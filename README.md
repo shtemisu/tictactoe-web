@@ -11,6 +11,11 @@
 
 `docker-compose up -d`
 
+## Запуск фронта без сборки
+
+в директории web/
+`python3 -m http.Server 5500`
+
 ## Base URL
 http://localhost:8080
 

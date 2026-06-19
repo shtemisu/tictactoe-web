@@ -130,6 +130,8 @@ Mkfile.old
 Makefile.old
 dkms.conf
 
+.env
+
 # Don't ignore go.mod and go.sum files
 !go.mod
 !go.sum

@@ -73,7 +73,7 @@ func NewHTTPServer(lc fx.Lifecycle, handler *handler.GameHandler, authHandler *m
 	router := web.NewRouter(*handler, *authHandler, *userHandler)
 	srv := &http.Server{
 		Addr:    ":8080",
-		Handler: router,
+		Handler: middleware.CORS(router),
 	}
 
 	lc.Append(fx.Hook{

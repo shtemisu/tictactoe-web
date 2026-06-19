@@ -2,10 +2,9 @@ package handler
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
-	"strings"
 	"tictactoe/internal/controller/dto/response"
+	"tictactoe/internal/controller/middleware"
 	"tictactoe/internal/usecase/user"
 	"tictactoe/pkg/jwt"
 )
@@ -22,24 +21,20 @@ func NewUserHandler(us *user.UserService, jp *jwt.JwtProvider) *UserHandler {
 	}
 }
 
-func (uh *UserHandler) GetGameHistoryByAccessToken(w http.ResponseWriter, r *http.Request) {
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-		uh.writeError(w, http.StatusBadRequest, "Bad request")
+// GetMyProfile returns the authenticated user's info: {id, login, games_played, wins}.
+// The userID is provided by the auth middleware via the request context.
+func (uh *UserHandler) GetMyProfile(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.GetUserById(r.Context())
+	if !ok {
+		uh.writeError(w, http.StatusUnauthorized, "User unauthorized")
 		return
 	}
-	tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
-	userID, err := uh.JwtProvider.GetUUIDByToken(tokenStr, false)
+	userInfo, err := uh.UserService.GetUserInfo(r.Context(), userID.String())
 	if err != nil {
 		uh.writeError(w, http.StatusNotFound, err.Error())
 		return
 	}
-	userResp, err := uh.UserService.GetGameHistoryByID(r.Context(), userID)
-	if err != nil {
-		uh.writeError(w, http.StatusNotFound, err.Error())
-		return
-	}
-	uh.writeJSON(w, http.StatusOK, userResp)
+	uh.writeJSON(w, http.StatusOK, userInfo)
 }
 
 func (uh *UserHandler) GetUserById(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +53,6 @@ func (uh *UserHandler) GetUserById(w http.ResponseWriter, r *http.Request) {
 
 func (uh *UserHandler) GetLeaderBoard(w http.ResponseWriter, r *http.Request) {
 	limit := r.PathValue("limit")
-	log.Println("limit value:", limit)
 	if limit == "" {
 		uh.writeError(w, http.StatusBadRequest, "bad request")
 		return

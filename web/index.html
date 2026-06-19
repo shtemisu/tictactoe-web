@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TicTacToe</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1 class="logo" data-nav="home">⊞ TicTacToe</h1>
+    <nav class="nav" id="nav-auth" hidden>
+      <button class="link" data-nav="leaderboard">Лидеры</button>
+      <button class="link" data-nav="profile" id="nav-profile">Профиль</button>
+      <button class="link danger" id="btn-logout">Выйти</button>
+    </nav>
+  </header>
+
+  <main id="app"></main>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <!-- ====== Templates ====== -->
+
+  <template id="tpl-auth">
+    <section class="card auth">
+      <div class="tabs">
+        <button class="tab active" data-tab="signin">Вход</button>
+        <button class="tab" data-tab="signup">Регистрация</button>
+      </div>
+      <form id="auth-form" class="form">
+        <label>Логин<input name="login" autocomplete="username" required /></label>
+        <label>Пароль<input name="password" type="password" autocomplete="current-password" required /></label>
+        <button class="btn primary" type="submit" id="auth-submit">Войти</button>
+      </form>
+    </section>
+  </template>
+
+  <template id="tpl-home">
+    <section class="menu">
+      <button class="tile" data-nav="play-ai">
+        <span class="tile-icon">🤖</span>
+        <span class="tile-title">Игра с ИИ</span>
+        <span class="tile-sub">Сразись с алгоритмом Минимакс</span>
+      </button>
+      <button class="tile" data-nav="create-mp">
+        <span class="tile-icon">➕</span>
+        <span class="tile-title">Создать игру</span>
+        <span class="tile-sub">Мультиплеер — пригласи соперника</span>
+      </button>
+      <button class="tile" data-nav="available">
+        <span class="tile-icon">🌐</span>
+        <span class="tile-title">Найти игру</span>
+        <span class="tile-sub">Список открытых игр</span>
+      </button>
+      <button class="tile" data-nav="join">
+        <span class="tile-icon">🔗</span>
+        <span class="tile-title">По ID</span>
+        <span class="tile-sub">Подключиться по UUID</span>
+      </button>
+    </section>
+  </template>
+
+  <template id="tpl-game">
+    <section class="card game">
+      <div class="game-head">
+        <button class="btn ghost" data-nav="home">← Меню</button>
+        <span class="badge" id="game-mode"></span>
+      </div>
+      <div class="status" id="game-status">Загрузка…</div>
+      <div class="board" id="board"></div>
+      <div class="game-meta">
+        <span>ID игры:</span>
+        <code id="game-id"></code>
+        <button class="btn ghost small" id="copy-id">Копировать</button>
+      </div>
+      <div class="game-actions" id="game-actions"></div>
+    </section>
+  </template>
+
+  <template id="tpl-list">
+    <section class="card list">
+      <div class="game-head">
+        <button class="btn ghost" data-nav="home">← Меню</button>
+        <h2 id="list-title"></h2>
+        <button class="btn ghost small" id="list-refresh">⟳</button>
+      </div>
+      <div id="list-body"></div>
+    </section>
+  </template>
+
+  <template id="tpl-join">
+    <section class="card">
+      <div class="game-head"><button class="btn ghost" data-nav="home">← Меню</button><h2>Подключиться по ID</h2></div>
+      <form id="join-form" class="form">
+        <label>UUID игры<input name="gameID" placeholder="66ad7b67-…" required /></label>
+        <button class="btn primary" type="submit">Подключиться</button>
+      </form>
+    </section>
+  </template>
+
+  <template id="tpl-profile">
+    <section class="card profile">
+      <div class="game-head"><button class="btn ghost" data-nav="home">← Меню</button><h2>Профиль</h2></div>
+      <div id="profile-body" class="profile-body">Загрузка…</div>
+    </section>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
